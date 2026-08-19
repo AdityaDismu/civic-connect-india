@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, isRedirect, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -23,8 +23,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
       const isAdmin = (roles ?? []).some((r) => r.role === "ADMIN");
       if (!isAdmin) throw redirect({ to: "/dashboard" });
     } catch (error) {
-      if (error instanceof Response) throw error;
-      if (typeof error === "object" && error !== null && "to" in error) throw error;
+      if (isRedirect(error) || error instanceof Response) throw error;
       console.error("[Auth] Authority route guard failed", error);
       throw redirect({ to: "/dashboard" });
     }
