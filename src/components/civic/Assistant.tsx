@@ -54,7 +54,7 @@ export function Assistant() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed right-5 bottom-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
+        className="fixed right-5 bottom-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_14px_30px_-12px_oklch(.29_.08_254_/_95%)] transition-transform hover:scale-105"
         aria-label="Open CivicPulse assistant"
       >
         <Bot className="h-5 w-5" />
@@ -63,7 +63,7 @@ export function Assistant() {
   }
 
   return (
-    <div className="fixed right-5 bottom-5 z-40 flex h-[420px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-xl border bg-card shadow-2xl">
+    <div className="fixed right-5 bottom-5 z-40 flex h-[420px] w-[min(92vw,360px)] flex-col overflow-hidden rounded-2xl border bg-card shadow-2xl">
       <div className="flex items-center justify-between border-b px-4 py-3">
         <span className="flex items-center gap-2 text-sm font-semibold">
           <Bot className="h-4 w-4 text-primary" /> CivicPulse Assistant

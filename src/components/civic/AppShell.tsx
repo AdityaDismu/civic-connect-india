@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Bell, LogOut, Menu } from "lucide-react";
+import { Activity, Bell, ChevronRight, LogOut, Menu, ShieldCheck } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -53,14 +53,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-30 border-b-2 border-primary bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center border border-primary bg-primary text-primary-foreground">
+    <div className={cn("flex min-h-screen flex-col bg-background", isAdmin && "authority-page")}>
+      <div className="tricolour-rule" />
+      <header className="sticky top-0 z-30 border-b border-border/90 bg-background/95 backdrop-blur-md">
+        <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center gap-3 px-4 md:px-8">
+          <Link to="/" className="flex items-center gap-2.5">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_8px_18px_-12px_oklch(.29_.08_254_/_90%)]">
               <Activity className="h-5 w-5" />
             </span>
-            <span className="font-display text-xl font-bold tracking-tight">CivicPulse</span>
+            <span>
+              <span className="block font-display text-lg font-bold leading-none tracking-tight">
+                CivicPulse
+              </span>
+              <span className="mt-1 block text-[9px] font-bold tracking-[.18em] text-muted-foreground uppercase">
+                AI civic service
+              </span>
+            </span>
           </Link>
 
           <nav className="ml-6 hidden items-center gap-1 lg:flex">
@@ -70,8 +78,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                     key={link.to}
                     to={link.to}
                     className={cn(
-                      "border-b-2 border-transparent px-3 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
-                      pathname.startsWith(link.to) && "border-primary text-foreground",
+                      "rounded-lg px-3 py-2 text-sm font-bold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                      pathname.startsWith(link.to) && "bg-secondary text-primary",
                     )}
                   >
                     {link.label}
@@ -102,7 +110,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <>
                 <Link
                   to="/notifications"
-                  className="relative rounded-md p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  className="relative rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
                   aria-label="Notifications"
                 >
                   <Bell className="h-5 w-5" />
@@ -112,9 +120,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     </span>
                   ) : null}
                 </Link>
-                <span className="hidden text-sm text-muted-foreground md:inline">
-                  {fullName || user.email}
-                  {isAdmin ? " · Admin" : ""}
+                <span className="hidden text-right text-xs text-muted-foreground md:inline">
+                  <span className="block font-bold text-foreground">{fullName || user.email}</span>
+                  <span>{isAdmin ? "Municipal operations" : "Citizen workspace"}</span>
                 </span>
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="mr-1 h-4 w-4" /> Sign out
@@ -140,15 +148,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         {open && user ? (
-          <nav className="border-t px-4 pb-3 lg:hidden">
+          <nav className="border-t bg-card px-4 py-3 lg:hidden">
             {links.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => setOpen(false)}
-                className="block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+                className="flex items-center justify-between rounded-lg px-3 py-3 text-sm font-bold text-muted-foreground hover:bg-secondary hover:text-foreground"
               >
                 {link.label}
+                <ChevronRight className="h-4 w-4" />
               </Link>
             ))}
           </nav>
@@ -157,12 +166,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t-2 border-primary bg-primary text-primary-foreground">
-        <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-6 text-sm text-primary-foreground/70">
-          <p className="font-display font-semibold text-primary-foreground">
-            REPORT IT. PRIORITIZE IT. TRACK IT. VERIFY IT.
+      <footer className="mt-8 bg-primary text-primary-foreground">
+        <div className="mx-auto grid max-w-7xl gap-5 px-4 py-8 md:grid-cols-[1fr_auto] md:px-8">
+          <div>
+            <p className="font-display text-lg font-bold">Civic action, made visible.</p>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-primary-foreground/72">
+              CivicPulse AI is an independent civic-technology prototype. It is not a government
+              service or emergency response system.
+            </p>
+          </div>
+          <p className="flex items-center gap-2 self-end text-xs font-semibold tracking-wide text-primary-foreground/70">
+            <ShieldCheck className="h-4 w-4 text-accent" /> REPORT · TRACK · VERIFY
           </p>
-          <p>CivicPulse AI — AI-assisted civic issue reporting and accountability.</p>
         </div>
       </footer>
 

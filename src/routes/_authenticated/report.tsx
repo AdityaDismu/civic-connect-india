@@ -348,14 +348,14 @@ function ReportPage() {
     <div className="page-shell max-w-4xl">
       <p className="page-kicker">New case</p>
       <h1 className="page-title">Report a civic issue</h1>
-      <ol className="mt-4 flex flex-wrap gap-2 text-xs">
+      <ol className="mt-7 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
         {["Photo", "AI details", "Location", "Confirm"].map((label, index) => (
           <li
             key={label}
             className={
               step === index + 1
-                ? "border border-primary bg-primary px-3 py-1 font-mono font-medium text-primary-foreground"
-                : "border border-border bg-card px-3 py-1 font-mono text-muted-foreground"
+                ? "rounded-lg border border-primary bg-primary px-3 py-3 text-center font-bold text-primary-foreground shadow-sm"
+                : "rounded-lg border border-border bg-card px-3 py-3 text-center font-bold text-muted-foreground"
             }
           >
             {index + 1}. {label}
@@ -364,7 +364,7 @@ function ReportPage() {
       </ol>
 
       {step === 1 ? (
-        <div className="civic-panel mt-6 border-dashed p-10 text-center">
+        <div className="civic-panel mt-6 border-dashed p-8 text-center md:p-12">
           <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-3 font-medium">Upload a photo of the issue</p>
           <p className="text-sm text-muted-foreground">JPG, PNG or WEBP up to 8MB.</p>
@@ -400,7 +400,7 @@ function ReportPage() {
             <img
               src={preview}
               alt="Uploaded issue"
-              className="max-h-64 w-full rounded-lg object-cover"
+              className="max-h-72 w-full rounded-xl border object-cover shadow-sm"
             />
           ) : null}
           {confidence ? <Chip tone="info">AI confidence: {confidence}</Chip> : null}
@@ -457,7 +457,7 @@ function ReportPage() {
           </div>
           {risk ? <p className="text-sm text-muted-foreground">Risk noted by AI: {risk}</p> : null}
           <p className="text-sm text-muted-foreground">Routing to: {department}</p>
-          <section className="border bg-card p-4">
+          <section className="rounded-xl border bg-card p-5 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)]">
             <p className="font-semibold">Add a voice note (optional)</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Explain anything the photo may not show. This will be attached to this complaint.
@@ -489,7 +489,7 @@ function ReportPage() {
               </Button>
             )}
           </section>
-          <section className="border-2 border-destructive bg-destructive/10 p-4">
+          <section className="rounded-xl border-2 border-destructive/70 bg-destructive/10 p-5">
             <label className="flex items-center gap-2 text-lg font-black text-destructive">
               <input
                 type="checkbox"
@@ -626,7 +626,7 @@ function ReportPage() {
             <p className="text-sm text-muted-foreground">No similar open reports within 150m.</p>
           )}
 
-          <div className="rounded-lg border bg-card p-4">
+          <div className="rounded-xl border bg-card p-5 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)]">
             <p className="font-medium">Priority preview: {priorityPreview.score}/100</p>
             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
               {priorityPreview.breakdown.map((factor) => (

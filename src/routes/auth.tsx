@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Activity, Loader2 } from "lucide-react";
+import { Activity, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -98,32 +98,35 @@ function AuthPage() {
 
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[1.05fr_.95fr]">
-      <div className="hidden flex-col justify-between border-r-2 border-primary bg-primary p-12 text-primary-foreground lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground lg:flex">
+        <div className="absolute left-0 top-0 h-1 w-full bg-accent" />
+        <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full border-[40px] border-primary-foreground/5" />
         <div className="flex items-center gap-2">
           <Activity className="h-6 w-6" />
           <span className="font-display text-2xl font-bold">CivicPulse</span>
         </div>
         <div>
-          <p className="font-mono text-[10px] tracking-[0.2em] text-primary-foreground/65 uppercase">
+          <p className="text-[10px] font-bold tracking-[.2em] text-accent uppercase">
             Residents’ civic ledger
           </p>
-          <h1 className="mt-5 font-display text-6xl leading-[.92] font-bold">
+          <h1 className="mt-5 font-display text-6xl leading-[.96] font-bold tracking-tight">
             Report it. Prioritize it.
             <br />
             Track it. Verify it.
           </h1>
-          <p className="mt-4 max-w-md text-primary-foreground/80">
+          <p className="mt-5 max-w-md leading-7 text-primary-foreground/78">
             Photograph a civic issue, let AI classify severity, watch a transparent priority score
             route it to the right department, and confirm the fix yourself.
           </p>
         </div>
-        <p className="text-sm text-primary-foreground/70">
-          Municipal staff use the separate Admin Portal sign-in provided by the project owner.
+        <p className="flex items-center gap-2 text-sm text-primary-foreground/70">
+          <CheckCircle2 className="h-4 w-4 text-accent" /> Every report is yours to track and
+          verify.
         </p>
       </div>
 
       <div className="flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-md border-t-4 border-primary pt-6">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-[0_24px_50px_-36px_oklch(.29_.08_254_/_75%)] md:p-8">
           <p className="page-kicker">Citizen access</p>
           <h2 className="mt-2 font-display text-4xl font-bold">Welcome in.</h2>
           <p className="mt-1 text-sm text-muted-foreground">

@@ -44,21 +44,17 @@ function Escalations() {
   const rows = query.data ?? [];
 
   return (
-    <div className="page-shell max-w-5xl">
+    <div className="page-shell max-w-5xl authority-page">
       <p className="page-kicker">Municipal operations</p>
       <h1 className="page-title">Escalations</h1>
       <div className="mt-6 space-y-3">
-        {rows.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
-            No escalated reports.
-          </p>
-        ) : null}
+        {rows.length === 0 ? <p className="empty-state">No escalated reports.</p> : null}
         {rows.map((row) => (
           <Link
             key={row.id}
             to="/complaint/$id"
             params={{ id: row.complaint_id }}
-            className="block border border-border bg-card p-5 hover:bg-secondary"
+            className="block rounded-xl border border-border bg-card p-5 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)] transition-all hover:-translate-y-px hover:border-primary/30 hover:bg-secondary"
           >
             <p className="font-mono text-xs text-muted-foreground">
               {row.complaints?.display_id ?? ""}

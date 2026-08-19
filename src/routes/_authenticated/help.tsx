@@ -29,7 +29,7 @@ function HelpPage() {
             help if needed.
           </p>
         </section>
-        <section className="border border-warning bg-warning/10 p-5">
+        <section className="rounded-xl border border-warning bg-warning/10 p-5">
           <h2 className="text-xl font-bold">Emergency guidance</h2>
           <p className="mt-2 text-sm">
             For immediate danger to life or safety, contact your local emergency services.

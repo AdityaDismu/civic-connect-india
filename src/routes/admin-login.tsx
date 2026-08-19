@@ -76,9 +76,9 @@ function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
-      <div className="w-full max-w-md border-t-4 border-primary bg-card p-8 shadow-[8px_8px_0_0_oklch(0.31_0.07_250_/_18%)]">
-        <span className="flex h-11 w-11 items-center justify-center border border-primary bg-primary text-primary-foreground">
+    <div className="service-grid flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-[0_24px_55px_-34px_oklch(.29_.08_254_/_80%)]">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
           <ShieldCheck className="h-6 w-6" />
         </span>
         <p className="page-kicker mt-6">Authorized operations</p>

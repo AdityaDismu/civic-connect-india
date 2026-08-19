@@ -202,7 +202,7 @@ function AdminQueue() {
       </div>
     );
   return (
-    <div className="page-shell max-w-7xl">
+    <div className="page-shell max-w-7xl authority-page">
       <p className="page-kicker">Municipal operations</p>
       <h1 className="page-title">Action queue</h1>
       <p className="page-subtitle">{rows.length} active reports, ranked by priority.</p>
@@ -211,7 +211,10 @@ function AdminQueue() {
           const progressPhotos = row.complaint_images?.filter((i) => i.kind === "PROGRESS") ?? [];
           const current = files[row.id] ?? { before: undefined, after: undefined };
           return (
-            <article key={row.id} className="border border-border bg-card p-5">
+            <article
+              key={row.id}
+              className="rounded-xl border border-border bg-card p-5 shadow-[0_10px_28px_-24px_oklch(.29_.08_254_/_65%)]"
+            >
               <div className="flex gap-4">
                 <StoredImage
                   path={row.complaint_images?.[0]?.image_url}
@@ -228,14 +231,14 @@ function AdminQueue() {
                   <Link
                     to="/complaint/$id"
                     params={{ id: row.id }}
-                    className="mt-1 block font-semibold"
+                    className="mt-2 block font-bold hover:text-primary"
                   >
                     {row.title}
                   </Link>
                   <p className="text-sm text-muted-foreground">{row.address}</p>
                 </div>
               </div>
-              <div className="mt-4 border-t pt-4">
+              <div className="mt-5 border-t pt-4">
                 {["SUBMITTED", "AI_VERIFIED", "REOPENED"].includes(row.status) ? (
                   <div className="flex gap-2">
                     <select

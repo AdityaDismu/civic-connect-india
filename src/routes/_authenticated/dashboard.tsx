@@ -61,13 +61,13 @@ function Dashboard() {
         </Button>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-7 grid gap-4 sm:grid-cols-3">
         {[
           { label: "Total reports", value: rows.length },
           { label: "Resolved", value: resolved },
           { label: "Awaiting your verification", value: awaiting },
         ].map((stat) => (
-          <div key={stat.label} className="civic-panel">
+          <div key={stat.label} className="civic-panel relative overflow-hidden">
             <p className="font-mono text-[10px] tracking-widest text-muted-foreground uppercase">
               {stat.label}
             </p>
@@ -79,7 +79,7 @@ function Dashboard() {
       <div className="mt-8 space-y-4">
         {reports.isLoading ? <p className="text-sm text-muted-foreground">Loading…</p> : null}
         {!reports.isLoading && rows.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-10 text-center">
+          <div className="empty-state">
             <p className="font-medium">No reports yet</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Photograph a civic issue and CivicPulse will classify and route it.
@@ -105,7 +105,7 @@ function Dashboard() {
               key={row.id}
               to="/complaint/$id"
               params={{ id: row.id }}
-              className="flex gap-4 border border-border bg-card p-4 transition-colors hover:bg-secondary"
+              className="group flex gap-4 rounded-xl border border-border bg-card p-4 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)] transition-all hover:-translate-y-px hover:border-primary/30 hover:bg-secondary/50"
             >
               <StoredImage path={image} alt={row.title} className="h-24 w-24 shrink-0 rounded-md" />
               <div className="min-w-0 flex-1">
@@ -115,7 +115,7 @@ function Dashboard() {
                   <SeverityBadge severity={row.severity as Severity} />
                   <PriorityPill score={priority.score} />
                 </div>
-                <p className="mt-1 truncate font-medium">{row.title}</p>
+                <p className="mt-2 truncate font-bold group-hover:text-primary">{row.title}</p>
                 <p className="truncate text-sm text-muted-foreground">{row.address}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Reported {formatDate(row.created_at)} · {row.support_count} community supporters

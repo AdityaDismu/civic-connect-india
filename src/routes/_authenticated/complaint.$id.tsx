@@ -228,7 +228,7 @@ function ComplaintPage() {
 
   return (
     <div className="page-shell max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)]">
         <span className="font-mono text-sm text-muted-foreground">{complaint.display_id}</span>
         <StatusBadge status={complaint.status as Status} />
         <SeverityBadge severity={complaint.severity as Severity} />
@@ -246,16 +246,16 @@ function ComplaintPage() {
           Download Receipt
         </Button>
       </div>
-      <div>
+      <div className="max-w-3xl">
         <p className="page-kicker">Public case file</p>
         <h1 className="page-title">{complaint.title}</h1>
       </div>
-      <p className="text-muted-foreground">{complaint.description}</p>
+      <p className="max-w-3xl text-base leading-7 text-muted-foreground">{complaint.description}</p>
       <p className="text-sm text-muted-foreground">
         {complaint.address} · Assigned department: {complaint.suggested_department}
       </p>
       {complaint.is_emergency ? (
-        <section className="border border-warning bg-warning/10 p-4">
+        <section className="rounded-xl border border-warning bg-warning/10 p-5">
           <p className="font-semibold">URGENT ISSUE</p>
           <p className="text-sm">
             Emergency Risk:{" "}
@@ -284,7 +284,7 @@ function ComplaintPage() {
       ) : null}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <StoredImage path={before} alt="Reported issue" className="h-64 w-full rounded-lg" />
+        <StoredImage path={before} alt="Reported issue" className="h-64 w-full rounded-xl border" />
         <CivicMap
           center={[complaint.latitude, complaint.longitude]}
           zoom={16}
@@ -300,7 +300,7 @@ function ComplaintPage() {
               priority: priority.score,
             },
           ]}
-          className="h-64 w-full rounded-lg border"
+          className="h-64 w-full rounded-xl border"
         />
       </div>
 
@@ -327,7 +327,7 @@ function ComplaintPage() {
                 <span
                   className={
                     done
-                      ? "mt-1 h-3 w-3 shrink-0 rounded-full bg-primary"
+                      ? "mt-1 h-3 w-3 shrink-0 rounded-full bg-primary ring-4 ring-primary/10"
                       : "mt-1 h-3 w-3 shrink-0 rounded-full bg-muted"
                   }
                 />

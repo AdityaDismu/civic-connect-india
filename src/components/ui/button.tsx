@@ -5,15 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none border border-transparent text-sm font-bold tracking-wide cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-transparent text-sm font-bold tracking-wide cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[3px_3px_0_0_oklch(0.17_0.03_250)] hover:translate-x-px hover:translate-y-px hover:shadow-none",
+          "bg-primary text-primary-foreground shadow-[0_8px_18px_-10px_oklch(.29_.08_254_/_95%)] hover:-translate-y-px hover:bg-primary/92 hover:shadow-[0_12px_22px_-12px_oklch(.29_.08_254_/_90%)]",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-[3px_3px_0_0_oklch(0.26_0.04_25)] hover:translate-x-px hover:translate-y-px hover:shadow-none",
-        outline: "border-border bg-background hover:bg-secondary hover:text-secondary-foreground",
+          "bg-destructive text-destructive-foreground shadow-[0_8px_18px_-10px_oklch(.45_.15_29_/_90%)] hover:-translate-y-px",
+        outline:
+          "border-border bg-background hover:border-primary/35 hover:bg-secondary hover:text-secondary-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",

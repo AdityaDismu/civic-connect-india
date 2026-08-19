@@ -97,7 +97,7 @@ function MapPage() {
         {points.length} reports plotted · {hotspots.length} civic hotspots (3+ open reports in one
         area).
       </p>
-      <div className="civic-panel mt-6 p-2">
+      <div className="civic-panel mt-6 p-2 md:p-3">
         <CivicMap
           center={center}
           zoom={13}

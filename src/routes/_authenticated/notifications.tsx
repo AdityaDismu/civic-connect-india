@@ -53,15 +53,11 @@ function Notifications() {
         ) : null}
       </div>
       <div className="mt-6 space-y-3">
-        {rows.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
-            No notifications yet.
-          </p>
-        ) : null}
+        {rows.length === 0 ? <p className="empty-state">No notifications yet.</p> : null}
         {rows.map((row) => {
           const body = (
             <div
-              className={`border p-5 ${row.is_read ? "border-border bg-card" : "border-primary bg-secondary"}`}
+              className={`rounded-xl border p-5 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)] ${row.is_read ? "border-border bg-card" : "border-primary/45 bg-secondary"}`}
             >
               <p className="font-medium">{row.title}</p>
               <p className="text-sm text-muted-foreground">{row.body}</p>

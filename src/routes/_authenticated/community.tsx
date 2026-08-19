@@ -63,16 +63,14 @@ function Community() {
       <div className="mt-6 space-y-3">
         {query.isLoading ? <p className="text-sm text-muted-foreground">Loading…</p> : null}
         {!query.isLoading && rows.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
-            No civic reports have been filed yet.
-          </p>
+          <p className="empty-state">No civic reports have been filed yet.</p>
         ) : null}
         {rows.map(({ row, priority }) => (
           <Link
             key={row.id}
             to="/complaint/$id"
             params={{ id: row.id }}
-            className="block border border-border bg-card p-5 transition-colors hover:bg-secondary"
+            className="block rounded-xl border border-border bg-card p-5 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)] transition-all hover:-translate-y-px hover:border-primary/30 hover:bg-secondary/50"
           >
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs text-muted-foreground">{row.display_id}</span>
@@ -85,7 +83,7 @@ function Community() {
               <SeverityBadge severity={row.severity as Severity} />
               <PriorityPill score={priority} />
             </div>
-            <p className="mt-1 font-medium">{row.title}</p>
+            <p className="mt-2 font-bold">{row.title}</p>
             <p className="text-sm text-muted-foreground">
               {row.address} · {formatDate(row.created_at)} · {row.support_count} supporters
             </p>
