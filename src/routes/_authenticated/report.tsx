@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Mic, Square, Trash2, Upload } from "lucide-react";
+import { FileImage, ImagePlus, Loader2, Mic, Plus, Square, Trash2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,6 +64,7 @@ function ReportPage() {
   const [blob, setBlob] = useState<Blob | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -134,6 +135,23 @@ function ReportPage() {
     }
   }
 
+  function handleExtraFiles(files: FileList | null) {
+    if (!files) return;
+    const newFiles = Array.from(files);
+    setExtraImages((prev) => [...prev, ...newFiles]);
+  }
+
+  function removeExtraImage(index: number) {
+    setExtraImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) void handleFile(file);
+  }
+
   async function checkDuplicates() {
     if (!coords) return;
     const { data } = await supabase
@@ -172,6 +190,7 @@ function ReportPage() {
       toast.error("Microphone access was not available. You can continue without a voice note.");
     }
   }
+
   function stopVoiceRecording() {
     recorder?.stop();
     setRecorder(null);
@@ -193,7 +212,6 @@ function ReportPage() {
 
       const path = await uploadImage("complaint-images", user.id, blob);
 
-      // AI decides the emergency verdict; the citizen answers are only evidence.
       const fallbackRisk =
         dangerNow && (peopleAtRisk || accessBlocked || severity === "CRITICAL")
           ? "HIGH"
@@ -364,33 +382,126 @@ function ReportPage() {
       </ol>
 
       {step === 1 ? (
-        <div className="civic-panel mt-6 border-dashed p-8 text-center md:p-12">
-          <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-          <p className="mt-3 font-medium">Upload a photo of the issue</p>
-          <p className="text-sm text-muted-foreground">JPG, PNG or WEBP up to 8MB.</p>
-          <Input
-            type="file"
-            accept="image/*"
-            className="mx-auto mt-4 max-w-xs"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void handleFile(file);
+        <div className="mt-6 space-y-6">
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
             }}
-          />
-          <label className="mt-4 block text-sm font-medium">
-            Add supporting photos (optional)
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition-all duration-200 md:p-12 ${
+              isDragging
+                ? "border-primary bg-primary/10 scale-[0.99]"
+                : "border-muted-foreground/25 bg-card hover:border-primary/50 hover:bg-muted/30"
+            }`}
+          >
+            {analyzing ? (
+              <div className="flex flex-col items-center justify-center space-y-3 py-6">
+                <div className="relative">
+                  <div className="h-12 w-12 rounded-full border-4 border-primary/20 animate-pulse" />
+                  <Loader2 className="absolute inset-0 m-auto h-6 w-6 animate-spin text-primary" />
+                </div>
+                <p className="text-sm font-medium text-foreground">Analyzing image with AI...</p>
+                <p className="text-xs text-muted-foreground">
+                  Classifying issue and severity details
+                </p>
+              </div>
+            ) : preview ? (
+              <div className="relative w-full overflow-hidden rounded-xl border bg-background shadow-md">
+                <img
+                  src={preview}
+                  alt="Main issue preview"
+                  className="max-h-80 w-full object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Label
+                    htmlFor="primary-image-input"
+                    className="cursor-pointer rounded-lg bg-background/90 px-4 py-2 text-xs font-semibold text-foreground shadow-sm backdrop-blur transition hover:bg-background"
+                  >
+                    Replace Photo
+                  </Label>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4 rounded-full bg-primary/10 p-4 text-primary transition-transform group-hover:scale-110">
+                  <Upload className="h-7 w-7" />
+                </div>
+                <p className="text-base font-semibold text-foreground">
+                  Drag and drop your primary photo here
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Supports JPG, PNG or WEBP up to 8MB
+                </p>
+                <Label
+                  htmlFor="primary-image-input"
+                  className="mt-5 inline-flex cursor-pointer items-center justify-center rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow hover:bg-primary/90"
+                >
+                  Browse Files
+                </Label>
+              </div>
+            )}
             <Input
+              id="primary-image-input"
               type="file"
               accept="image/*"
-              multiple
-              onChange={(e) => setExtraImages(Array.from(e.target.files ?? []))}
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleFile(file);
+              }}
             />
-          </label>
-          {analyzing ? (
-            <p className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> AI is analysing the photo…
-            </p>
-          ) : null}
+          </div>
+
+          <div className="rounded-xl border bg-card p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Supporting Photos (Optional)
+                </p>
+                <p className="text-xs text-muted-foreground">Add extra angles or close-ups</p>
+              </div>
+              <Label
+                htmlFor="extra-images-input"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent hover:text-accent-foreground"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Images
+              </Label>
+              <Input
+                id="extra-images-input"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => handleExtraFiles(e.target.files)}
+              />
+            </div>
+
+            {extraImages.length > 0 && (
+              <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+                {extraImages.map((file, index) => (
+                  <div
+                    key={index}
+                    className="group relative aspect-square overflow-hidden rounded-lg border bg-muted"
+                  >
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Supporting item ${index + 1}`}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExtraImage(index)}
+                      className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       ) : null}
 
