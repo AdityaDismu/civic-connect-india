@@ -13,6 +13,24 @@ const AssessInput = z.object({
   issueTitle: z.string().default(""),
 });
 
+const EmergencyInput = z.object({
+  imageDataUrl: z.string().min(20),
+  title: z.string().max(200).default(""),
+  description: z.string().max(2000).default(""),
+  category: z.string().max(50).default("OTHER"),
+  severity: z.string().max(20).default("MEDIUM"),
+  address: z.string().max(300).default(""),
+  citizenFlags: z
+    .object({
+      markedEmergency: z.boolean().default(false),
+      dangerNow: z.boolean().default(false),
+      peopleAtRisk: z.boolean().default(false),
+      accessBlocked: z.boolean().default(false),
+      hazardType: z.string().max(200).default(""),
+    })
+    .default({}),
+});
+
 const AssistInput = z.object({
   question: z.string().min(1).max(500),
   context: z.string().max(4000).default(""),
@@ -163,6 +181,64 @@ export const assessResolution = createServerFn({ method: "POST" })
 
     const text = await callGemini(parts, systemInstruction, true);
     return parseJson<ResolutionAssessment>(text);
+  });
+
+export type EmergencyAssessment = {
+  is_emergency: boolean;
+  risk: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | string;
+  hazard: string;
+  explanation: string;
+  recommended_action: string;
+  confidence_label: string;
+};
+
+/**
+ * AI decides whether a report is a genuine public-safety emergency.
+ * The citizen's answers are evidence, not the verdict, so an unticked photo of
+ * an open manhole can still be escalated and a ticked cosmetic issue can be
+ * downgraded.
+ */
+export const assessEmergency = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => EmergencyInput.parse(input))
+  .handler(async ({ data }): Promise<EmergencyAssessment> => {
+    const { mimeType, base64Data } = parseDataUrl(data.imageDataUrl);
+
+    const systemInstruction =
+      "You are a municipal emergency triage officer. Judge how dangerous a reported civic issue is to the public right now, " +
+      "using the photo as primary evidence and the citizen's answers as supporting claims you may override. " +
+      "Respond with strict JSON: {is_emergency, risk, hazard, explanation, recommended_action, confidence_label}. " +
+      "risk must be LOW, MEDIUM, HIGH or CRITICAL. is_emergency is true only when risk is HIGH or CRITICAL. " +
+      "hazard is a short phrase such as 'fall into open manhole' or 'none'. explanation is one factual sentence about what the photo shows. " +
+      "recommended_action is one short municipal instruction. confidence_label must be LOW, MEDIUM or HIGH. " +
+      "Do not treat a citizen's emergency checkbox as proof, and never invent details not visible in the photo.";
+
+    const context = [
+      `Title: ${data.title}`,
+      `Description: ${data.description}`,
+      `Category: ${data.category}`,
+      `Citizen-selected severity: ${data.severity}`,
+      `Location: ${data.address}`,
+      `Citizen marked emergency: ${data.citizenFlags.markedEmergency}`,
+      `Citizen says immediate danger: ${data.citizenFlags.dangerNow}`,
+      `Citizen says someone at risk now: ${data.citizenFlags.peopleAtRisk}`,
+      `Citizen says access blocked: ${data.citizenFlags.accessBlocked}`,
+      `Citizen hazard note: ${data.citizenFlags.hazardType || "none"}`,
+    ].join("\n");
+
+    const parts: GeminiPart[] = [
+      { text: `Assess the emergency risk of this civic issue.\n${context}` },
+      { inline_data: { mime_type: mimeType, data: base64Data } },
+    ];
+
+    const parsed = parseJson<EmergencyAssessment>(await callGemini(parts, systemInstruction, true));
+    const risk = ["LOW", "MEDIUM", "HIGH", "CRITICAL"].includes(String(parsed.risk).toUpperCase())
+      ? String(parsed.risk).toUpperCase()
+      : "LOW";
+    return {
+      ...parsed,
+      risk,
+      is_emergency: risk === "HIGH" || risk === "CRITICAL",
+    };
   });
 
 export const askAssistant = createServerFn({ method: "POST" })

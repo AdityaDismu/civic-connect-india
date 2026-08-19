@@ -18,7 +18,8 @@ import { CivicMap } from "@/components/civic/CivicMap";
 import { Chip } from "@/components/civic/badges";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { analyzeIssueImage } from "@/lib/ai.functions";
+import { analyzeIssueImage, assessEmergency } from "@/lib/ai.functions";
+import type { EmergencyAssessment } from "@/lib/ai.functions";
 import { blobToDataUrl, compressImage, uploadImage, validateImage } from "@/lib/storage";
 import {
   CATEGORIES,
@@ -56,6 +57,7 @@ function ReportPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const analyze = useServerFn(analyzeIssueImage);
+  const triage = useServerFn(assessEmergency);
 
   const [step, setStep] = useState(1);
   const [preview, setPreview] = useState<string | null>(null);
@@ -191,6 +193,40 @@ function ReportPage() {
 
       const path = await uploadImage("complaint-images", user.id, blob);
 
+      // AI decides the emergency verdict; the citizen answers are only evidence.
+      const fallbackRisk =
+        dangerNow && (peopleAtRisk || accessBlocked || severity === "CRITICAL")
+          ? "HIGH"
+          : peopleAtRisk || accessBlocked
+            ? "MEDIUM"
+            : "LOW";
+      let triaged: EmergencyAssessment | null = null;
+      try {
+        triaged = await triage({
+          data: {
+            imageDataUrl: preview ?? (await blobToDataUrl(blob)),
+            title: title.trim(),
+            description: description.trim(),
+            category,
+            severity,
+            address: address.trim(),
+            citizenFlags: {
+              markedEmergency: isEmergency,
+              dangerNow,
+              peopleAtRisk,
+              accessBlocked,
+              hazardType,
+            },
+          },
+        });
+      } catch (triageError) {
+        console.error("[AI] Emergency triage unavailable", triageError);
+      }
+      const finalRisk = triaged?.risk ?? fallbackRisk;
+      const finalEmergency = triaged
+        ? triaged.is_emergency || isEmergency
+        : isEmergency && fallbackRisk !== "LOW";
+
       const { data: complaint, error } = await supabase
         .from("complaints")
         .insert({
@@ -206,28 +242,29 @@ function ReportPage() {
           priority_score: priority.score,
           priority_breakdown: priority.breakdown,
           status: "AI_VERIFIED",
-          is_emergency: isEmergency,
-          emergency_assessment: isEmergency
-            ? {
-                risk:
-                  dangerNow && (peopleAtRisk || accessBlocked || severity === "CRITICAL")
-                    ? "HIGH"
-                    : peopleAtRisk || accessBlocked
-                      ? "MEDIUM"
-                      : "LOW",
-                factors: {
-                  dangerNow,
-                  peopleAtRisk,
-                  accessBlocked,
-                  hazardType,
-                  severity,
-                  hasPhoto: Boolean(blob),
-                  extraEvidence: extraImages.length,
-                },
-                explanation:
-                  "Prototype risk assessment based on the citizen's safety answers, submitted evidence, and issue severity.",
-              }
-            : {},
+          is_emergency: finalEmergency,
+          emergency_assessment: {
+            source: triaged ? "AI" : "RULES",
+            risk: finalRisk,
+            hazard: triaged?.hazard ?? hazardType,
+            explanation:
+              triaged?.explanation ??
+              "Risk derived from the citizen's safety answers and the issue severity because AI triage was unavailable.",
+            recommended_action: triaged?.recommended_action ?? "",
+            confidence: triaged?.confidence_label ?? "LOW",
+            citizen_flags: {
+              markedEmergency: isEmergency,
+              dangerNow,
+              peopleAtRisk,
+              accessBlocked,
+              hazardType,
+            },
+            factors: {
+              severity,
+              hasPhoto: Boolean(blob),
+              extraEvidence: extraImages.length,
+            },
+          },
         })
         .select("id, display_id")
         .single();
@@ -283,6 +320,11 @@ function ReportPage() {
         body: `Your ${CATEGORY_LABELS[category]} report was routed to ${department}.`,
       });
 
+      if (finalEmergency && !isEmergency) {
+        toast.warning(
+          `AI triage flagged this as an emergency (${finalRisk} risk). It has been escalated for priority attention.`,
+        );
+      }
       toast.success(`Report ${complaint.display_id} submitted.`);
       void navigate({ to: "/complaint/$id", params: { id: complaint.id } });
     } catch (error) {
@@ -457,7 +499,9 @@ function ReportPage() {
               Emergency / Urgent Issue
             </label>
             <p className="mt-1 text-sm text-muted-foreground">
-              For immediate danger to life or safety, contact your local emergency services.
+              For immediate danger to life or safety, contact your local emergency services. AI also
+              reviews your photo on submission and can escalate the report even if you leave this
+              unticked.
             </p>
             {isEmergency ? (
               <div className="mt-3 grid gap-2 text-sm">
