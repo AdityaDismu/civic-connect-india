@@ -10,33 +10,182 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedCommunityRouteImport } from './routes/_authenticated/community'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedHelpRouteImport } from './routes/_authenticated/help'
+import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedReportRouteImport } from './routes/_authenticated/report'
+import { Route as AuthenticatedAdminEscalationsRouteImport } from './routes/_authenticated/admin.escalations'
+import { Route as AuthenticatedAdminQueueRouteImport } from './routes/_authenticated/admin.queue'
+import { Route as AuthenticatedComplaintIdRouteImport } from './routes/_authenticated/complaint.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCommunityRoute = AuthenticatedCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHelpRoute = AuthenticatedHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMapRoute = AuthenticatedMapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReportRoute = AuthenticatedReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminEscalationsRoute =
+  AuthenticatedAdminEscalationsRouteImport.update({
+    id: '/admin/escalations',
+    path: '/admin/escalations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminQueueRoute = AuthenticatedAdminQueueRouteImport.update({
+  id: '/admin/queue',
+  path: '/admin/queue',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedComplaintIdRoute =
+  AuthenticatedComplaintIdRouteImport.update({
+    id: '/complaint/$id',
+    path: '/complaint/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/auth': typeof AuthRoute
+  '/community': typeof AuthenticatedCommunityRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/help': typeof AuthenticatedHelpRoute
+  '/map': typeof AuthenticatedMapRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/report': typeof AuthenticatedReportRoute
+  '/admin/escalations': typeof AuthenticatedAdminEscalationsRoute
+  '/admin/queue': typeof AuthenticatedAdminQueueRoute
+  '/complaint/$id': typeof AuthenticatedComplaintIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/auth': typeof AuthRoute
+  '/community': typeof AuthenticatedCommunityRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/help': typeof AuthenticatedHelpRoute
+  '/map': typeof AuthenticatedMapRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/report': typeof AuthenticatedReportRoute
+  '/admin/escalations': typeof AuthenticatedAdminEscalationsRoute
+  '/admin/queue': typeof AuthenticatedAdminQueueRoute
+  '/complaint/$id': typeof AuthenticatedComplaintIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
+  '/auth': typeof AuthRoute
+  '/_authenticated/community': typeof AuthenticatedCommunityRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/help': typeof AuthenticatedHelpRoute
+  '/_authenticated/map': typeof AuthenticatedMapRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/report': typeof AuthenticatedReportRoute
+  '/_authenticated/admin/escalations': typeof AuthenticatedAdminEscalationsRoute
+  '/_authenticated/admin/queue': typeof AuthenticatedAdminQueueRoute
+  '/_authenticated/complaint/$id': typeof AuthenticatedComplaintIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin-login'
+    | '/auth'
+    | '/community'
+    | '/dashboard'
+    | '/help'
+    | '/map'
+    | '/notifications'
+    | '/report'
+    | '/admin/escalations'
+    | '/admin/queue'
+    | '/complaint/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin-login'
+    | '/auth'
+    | '/community'
+    | '/dashboard'
+    | '/help'
+    | '/map'
+    | '/notifications'
+    | '/report'
+    | '/admin/escalations'
+    | '/admin/queue'
+    | '/complaint/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/admin-login'
+    | '/auth'
+    | '/_authenticated/community'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/help'
+    | '/_authenticated/map'
+    | '/_authenticated/notifications'
+    | '/_authenticated/report'
+    | '/_authenticated/admin/escalations'
+    | '/_authenticated/admin/queue'
+    | '/_authenticated/complaint/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +197,125 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/community': {
+      id: '/_authenticated/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof AuthenticatedCommunityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/help': {
+      id: '/_authenticated/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof AuthenticatedHelpRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/map': {
+      id: '/_authenticated/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof AuthenticatedMapRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/report': {
+      id: '/_authenticated/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof AuthenticatedReportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/escalations': {
+      id: '/_authenticated/admin/escalations'
+      path: '/admin/escalations'
+      fullPath: '/admin/escalations'
+      preLoaderRoute: typeof AuthenticatedAdminEscalationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/queue': {
+      id: '/_authenticated/admin/queue'
+      path: '/admin/queue'
+      fullPath: '/admin/queue'
+      preLoaderRoute: typeof AuthenticatedAdminQueueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/complaint/$id': {
+      id: '/_authenticated/complaint/$id'
+      path: '/complaint/$id'
+      fullPath: '/complaint/$id'
+      preLoaderRoute: typeof AuthenticatedComplaintIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCommunityRoute: typeof AuthenticatedCommunityRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHelpRoute: typeof AuthenticatedHelpRoute
+  AuthenticatedMapRoute: typeof AuthenticatedMapRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedReportRoute: typeof AuthenticatedReportRoute
+  AuthenticatedAdminEscalationsRoute: typeof AuthenticatedAdminEscalationsRoute
+  AuthenticatedAdminQueueRoute: typeof AuthenticatedAdminQueueRoute
+  AuthenticatedComplaintIdRoute: typeof AuthenticatedComplaintIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCommunityRoute: AuthenticatedCommunityRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHelpRoute: AuthenticatedHelpRoute,
+  AuthenticatedMapRoute: AuthenticatedMapRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedReportRoute: AuthenticatedReportRoute,
+  AuthenticatedAdminEscalationsRoute: AuthenticatedAdminEscalationsRoute,
+  AuthenticatedAdminQueueRoute: AuthenticatedAdminQueueRoute,
+  AuthenticatedComplaintIdRoute: AuthenticatedComplaintIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
