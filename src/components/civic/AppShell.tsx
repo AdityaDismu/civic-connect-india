@@ -19,6 +19,7 @@ const citizenLinks = [
 const adminLinks = [
   { to: "/admin/queue", label: "Action Queue" },
   { to: "/admin/escalations", label: "Escalations" },
+  { to: "/map", label: "Live Map" },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -42,11 +43,13 @@ export function AppShell({ children }: { children: ReactNode }) {
     },
   });
 
-  const links = isAdmin ? [...citizenLinks, ...adminLinks] : citizenLinks;
+  // Strict role separation: authority staff see the control-room nav only,
+  // citizens never see admin destinations.
+  const links = isAdmin ? adminLinks : citizenLinks;
 
   async function handleSignOut() {
     await signOutEverywhere(queryClient);
-    void navigate({ to: "/auth", replace: true });
+    void navigate({ to: isAdmin ? "/admin-login" : "/auth", replace: true });
   }
 
   return (
