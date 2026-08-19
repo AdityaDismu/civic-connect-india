@@ -320,6 +320,11 @@ function ReportPage() {
         body: `Your ${CATEGORY_LABELS[category]} report was routed to ${department}.`,
       });
 
+      if (finalEmergency && !isEmergency) {
+        toast.warning(
+          `AI triage flagged this as an emergency (${finalRisk} risk). It has been escalated for priority attention.`,
+        );
+      }
       toast.success(`Report ${complaint.display_id} submitted.`);
       void navigate({ to: "/complaint/$id", params: { id: complaint.id } });
     } catch (error) {
@@ -494,7 +499,9 @@ function ReportPage() {
               Emergency / Urgent Issue
             </label>
             <p className="mt-1 text-sm text-muted-foreground">
-              For immediate danger to life or safety, contact your local emergency services.
+              For immediate danger to life or safety, contact your local emergency services. AI also
+              reviews your photo on submission and can escalate the report even if you leave this
+              unticked.
             </p>
             {isEmergency ? (
               <div className="mt-3 grid gap-2 text-sm">
