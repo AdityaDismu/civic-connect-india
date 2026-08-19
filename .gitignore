@@ -1,4 +1,5 @@
 # Logs
+.env
 logs
 *.log
 npm-debug.log*
@@ -14,6 +15,7 @@ dist-ssr
 .vinxi
 .tanstack/**
 .nitro
+.vercel/output
 *.local
 
 # Wrangler / Cloudflare
