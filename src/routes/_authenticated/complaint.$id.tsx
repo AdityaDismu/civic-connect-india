@@ -56,14 +56,20 @@ function ComplaintPage() {
   const query = useQuery({
     queryKey: ["complaint", id],
     queryFn: async () => {
-      const [complaint, images, history, evidence, support, verifications] = await Promise.all([
-        supabase.from("complaints").select("*").eq("id", id).maybeSingle(),
-        supabase.from("complaint_images").select("*").eq("complaint_id", id),
-        supabase.from("status_history").select("*").eq("complaint_id", id).order("created_at"),
-        supabase.from("resolution_evidence").select("*").eq("complaint_id", id).order("created_at"),
-        supabase.from("community_support").select("user_id").eq("complaint_id", id),
-        supabase.from("citizen_verifications").select("*").eq("complaint_id", id),
-      ]);
+      const [complaint, images, history, evidence, support, verifications, analyses] =
+        await Promise.all([
+          supabase.from("complaints").select("*").eq("id", id).maybeSingle(),
+          supabase.from("complaint_images").select("*").eq("complaint_id", id),
+          supabase.from("status_history").select("*").eq("complaint_id", id).order("created_at"),
+          supabase
+            .from("resolution_evidence")
+            .select("*")
+            .eq("complaint_id", id)
+            .order("created_at"),
+          supabase.from("community_support").select("user_id").eq("complaint_id", id),
+          supabase.from("citizen_verifications").select("*").eq("complaint_id", id),
+          supabase.from("ai_analyses").select("kind, risk, raw").eq("complaint_id", id),
+        ]);
       if (complaint.error) throw new Error(complaint.error.message);
       const voiceUrl = complaint.data?.voice_note_url
         ? await resolveImageUrl(complaint.data.voice_note_url)
@@ -76,6 +82,7 @@ function ComplaintPage() {
         evidence: evidence.data ?? [],
         support: support.data ?? [],
         verifications: verifications.data ?? [],
+        analyses: analyses.data ?? [],
       };
     },
   });
@@ -133,6 +140,17 @@ function ComplaintPage() {
   const latestEvidence = data?.evidence.at(-1);
   const progressPhotos = data?.images.filter((image) => image.kind === "PROGRESS") ?? [];
   const reachedIndex = TIMELINE_STEPS.findIndex((s) => s.status === complaint.status);
+  const integrity = data?.analyses.find((analysis) => analysis.kind === "ISSUE")?.raw as
+    | {
+        report_integrity?: {
+          level?: string;
+          reasons?: string[];
+          disclaimer?: string;
+          requires_authority_review?: boolean;
+        };
+      }
+    | undefined;
+  const reportIntegrity = integrity?.report_integrity;
 
   async function handleDownloadReceipt() {
     if (!complaint) return;
@@ -265,6 +283,28 @@ function ComplaintPage() {
             This is a CivicPulse AI prototype assessment and does not guarantee an emergency
             response.
           </p>
+        </section>
+      ) : null}
+      {reportIntegrity ? (
+        <section
+          className={`rounded-xl border p-5 ${reportIntegrity.level === "HIGH" ? "border-destructive/50 bg-destructive/10" : reportIntegrity.level === "MEDIUM" ? "border-warning/50 bg-warning/10" : "border-success/40 bg-success/10"}`}
+        >
+          <p className="font-semibold">
+            Report integrity check: {reportIntegrity.level ?? "UNDER REVIEW"} risk
+          </p>
+          {reportIntegrity.requires_authority_review ? (
+            <p className="mt-1 text-sm font-medium text-destructive">
+              Flagged for authority review. Submission remains active.
+            </p>
+          ) : null}
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+            {reportIntegrity.reasons?.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+          {reportIntegrity.disclaimer ? (
+            <p className="mt-3 text-xs text-muted-foreground">{reportIntegrity.disclaimer}</p>
+          ) : null}
         </section>
       ) : null}
       {data?.voiceUrl ? (

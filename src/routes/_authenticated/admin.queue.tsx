@@ -53,7 +53,7 @@ function AdminQueue() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("complaints")
-        .select("*, complaint_images(image_url, kind)")
+        .select("*, complaint_images(image_url, kind), ai_analyses(kind, risk, raw)")
         .neq("status", "RESOLVED");
       if (error) throw new Error(error.message);
       return data ?? [];
@@ -270,6 +270,16 @@ function AdminQueue() {
         {rows.map(({ row, priority }) => {
           const progressPhotos = row.complaint_images?.filter((i) => i.kind === "PROGRESS") ?? [];
           const current = files[row.id] ?? { before: undefined, after: undefined };
+          const integrity = row.ai_analyses?.find((analysis) => analysis.kind === "ISSUE")?.raw as
+            | {
+                report_integrity?: {
+                  level?: string;
+                  reasons?: string[];
+                  requires_authority_review?: boolean;
+                };
+              }
+            | undefined;
+          const reportIntegrity = integrity?.report_integrity;
 
           return (
             <article
@@ -301,6 +311,17 @@ function AdminQueue() {
                     <ChevronRight className="h-4 w-4 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
                   </Link>
                   <p className="text-sm text-muted-foreground">{row.address}</p>
+                  {reportIntegrity ? (
+                    <div
+                      className={`rounded-md border px-3 py-2 text-xs ${reportIntegrity.level === "HIGH" ? "border-destructive/50 bg-destructive/10 text-destructive" : "border-border bg-muted/40 text-muted-foreground"}`}
+                    >
+                      <strong>Report integrity: {reportIntegrity.level ?? "UNDER REVIEW"}</strong>
+                      {reportIntegrity.requires_authority_review
+                        ? " · Authority review required"
+                        : ""}
+                      {reportIntegrity.reasons?.[0] ? ` · ${reportIntegrity.reasons[0]}` : ""}
+                    </div>
+                  ) : null}
                 </div>
               </div>
 

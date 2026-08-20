@@ -19,7 +19,7 @@ import { Chip } from "@/components/civic/badges";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { analyzeIssueImage, assessEmergency } from "@/lib/ai.functions";
-import type { EmergencyAssessment } from "@/lib/ai.functions";
+import type { EmergencyAssessment, ReportIntegrity } from "@/lib/ai.functions";
 import { blobToDataUrl, compressImage, uploadImage, validateImage } from "@/lib/storage";
 import {
   CATEGORIES,
@@ -32,6 +32,7 @@ import {
   type Severity,
 } from "@/lib/civic";
 import { computePriority } from "@/lib/priority";
+import { findSimilarImage, readImageMetadata, type ImageMetadata } from "@/lib/image-forensics";
 
 export const Route = createFileRoute("/_authenticated/report")({
   head: () => ({
@@ -52,6 +53,31 @@ export const Route = createFileRoute("/_authenticated/report")({
 });
 
 type Nearby = { id: string; display_id: string; title: string; distance: number };
+
+function IntegrityNotice({ integrity }: { integrity: ReportIntegrity }) {
+  const tone =
+    integrity.level === "HIGH"
+      ? "border-destructive/50 bg-destructive/10"
+      : integrity.level === "MEDIUM"
+        ? "border-warning/50 bg-warning/10"
+        : "border-success/40 bg-success/10";
+  return (
+    <section className={`rounded-xl border p-4 ${tone}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-semibold">Report integrity check: {integrity.level} risk</p>
+        {integrity.requires_authority_review ? (
+          <span className="text-xs font-bold text-destructive">FLAGGED FOR AUTHORITY REVIEW</span>
+        ) : null}
+      </div>
+      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+        {integrity.reasons.map((reason) => (
+          <li key={reason}>{reason}</li>
+        ))}
+      </ul>
+      <p className="mt-3 text-xs text-muted-foreground">{integrity.disclaimer}</p>
+    </section>
+  );
+}
 
 function ReportPage() {
   const { user } = useAuth();
@@ -85,6 +111,12 @@ function ReportPage() {
   const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
   const [voiceUrl, setVoiceUrl] = useState<string | null>(null);
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
+  const [imageMetadata, setImageMetadata] = useState<ImageMetadata>({ available: false });
+  const [imageIntegrity, setImageIntegrity] = useState<ReportIntegrity | null>(null);
+  const [duplicateSignal, setDuplicateSignal] = useState<{
+    similarity: number;
+    matchedComplaintId?: string;
+  }>({ similarity: 0 });
 
   useEffect(() => {
     if (step !== 3 || coords) return;
@@ -101,13 +133,15 @@ function ReportPage() {
       toast.error(problem);
       return;
     }
+    const metadata = await readImageMetadata(file);
+    setImageMetadata(metadata);
     const compressed = await compressImage(file);
     const dataUrl = await blobToDataUrl(compressed);
     setBlob(compressed);
     setPreview(dataUrl);
     setAnalyzing(true);
     try {
-      const result = await analyze({ data: { imageDataUrl: dataUrl } });
+      const result = await analyze({ data: { imageDataUrl: dataUrl, metadata } });
       if (!result.is_civic_issue) {
         toast.warning(
           "AI could not find a civic issue in this photo. You can still edit and submit.",
@@ -126,6 +160,7 @@ function ReportPage() {
       setRisk(result.risk || "");
       setConfidence(result.confidence || "");
       setDepartment(result.suggested_department || CATEGORY_DEPARTMENT[cat]);
+      setImageIntegrity(result.integrity);
       setStep(2);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "AI analysis failed.");
@@ -156,7 +191,9 @@ function ReportPage() {
     if (!coords) return;
     const { data } = await supabase
       .from("complaints")
-      .select("id, display_id, title, latitude, longitude, status")
+      .select(
+        "id, display_id, title, latitude, longitude, status, complaint_images(image_url, kind)",
+      )
       .eq("category", category)
       .neq("status", "RESOLVED");
     const list = (data ?? [])
@@ -169,6 +206,36 @@ function ReportPage() {
       .filter((row) => row.distance <= 150)
       .sort((a, b) => a.distance - b.distance);
     setNearby(list);
+    if (preview) {
+      try {
+        const duplicate = await findSimilarImage(
+          preview,
+          (data ?? []).flatMap((row) =>
+            (row.complaint_images ?? [])
+              .filter((image) => image.kind === "BEFORE")
+              .map((image) => ({ complaintId: row.id, imageUrl: image.image_url })),
+          ),
+        );
+        setDuplicateSignal(duplicate);
+        const refreshed = await analyze({
+          data: {
+            imageDataUrl: preview,
+            metadata: imageMetadata,
+            duplicate,
+            claim: {
+              title: title.trim(),
+              description: description.trim(),
+              category,
+              latitude: coords.lat,
+              longitude: coords.lng,
+            },
+          },
+        });
+        setImageIntegrity(refreshed.integrity);
+      } catch {
+        toast.warning("Some report-integrity checks were unavailable. You can still submit.");
+      }
+    }
     setStep(4);
   }
 
@@ -323,11 +390,19 @@ function ReportPage() {
         issue_type: title,
         category,
         severity,
-        risk,
+        risk: imageIntegrity?.level ?? risk,
         description,
         suggested_department: department,
         confidence: confidence || "MEDIUM",
-        raw: { title, description, risk, confidence },
+        raw: {
+          title,
+          description,
+          risk,
+          confidence,
+          report_integrity: imageIntegrity,
+          exif_metadata: imageMetadata,
+          duplicate_signal: duplicateSignal,
+        },
       });
 
       await supabase.from("notifications").insert({
@@ -567,6 +642,7 @@ function ReportPage() {
             </div>
           </div>
           {risk ? <p className="text-sm text-muted-foreground">Risk noted by AI: {risk}</p> : null}
+          {imageIntegrity ? <IntegrityNotice integrity={imageIntegrity} /> : null}
           <p className="text-sm text-muted-foreground">Routing to: {department}</p>
           <section className="rounded-xl border bg-card p-5 shadow-[0_8px_22px_-24px_oklch(.29_.08_254_/_70%)]">
             <p className="font-semibold">Add a voice note (optional)</p>
@@ -747,6 +823,7 @@ function ReportPage() {
               ))}
             </ul>
           </div>
+          {imageIntegrity ? <IntegrityNotice integrity={imageIntegrity} /> : null}
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setStep(3)}>
