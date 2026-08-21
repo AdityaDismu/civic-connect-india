@@ -20,6 +20,7 @@ import { Route as AuthenticatedHelpRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedMapRouteImport } from './routes/_authenticated/map'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedReportRouteImport } from './routes/_authenticated/report'
+import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedAdminEscalationsRouteImport } from './routes/_authenticated/admin.escalations'
 import { Route as AuthenticatedAdminQueueRouteImport } from './routes/_authenticated/admin.queue'
 import { Route as AuthenticatedComplaintIdRouteImport } from './routes/_authenticated/complaint.$id'
@@ -79,6 +80,11 @@ const AuthenticatedReportRoute = AuthenticatedReportRouteImport.update({
   path: '/report',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminEscalationsRoute =
   AuthenticatedAdminEscalationsRouteImport.update({
     id: '/escalations',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/map': typeof AuthenticatedMapRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/report': typeof AuthenticatedReportRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
   '/admin/escalations': typeof AuthenticatedAdminEscalationsRoute
   '/admin/queue': typeof AuthenticatedAdminQueueRoute
   '/complaint/$id': typeof AuthenticatedComplaintIdRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/map': typeof AuthenticatedMapRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/report': typeof AuthenticatedReportRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
   '/admin/escalations': typeof AuthenticatedAdminEscalationsRoute
   '/admin/queue': typeof AuthenticatedAdminQueueRoute
   '/complaint/$id': typeof AuthenticatedComplaintIdRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_authenticated/map': typeof AuthenticatedMapRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/report': typeof AuthenticatedReportRoute
+  '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/admin/escalations': typeof AuthenticatedAdminEscalationsRoute
   '/_authenticated/admin/queue': typeof AuthenticatedAdminQueueRoute
   '/_authenticated/complaint/$id': typeof AuthenticatedComplaintIdRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/notifications'
     | '/report'
+    | '/rewards'
     | '/admin/escalations'
     | '/admin/queue'
     | '/complaint/$id'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/notifications'
     | '/report'
+    | '/rewards'
     | '/admin/escalations'
     | '/admin/queue'
     | '/complaint/$id'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_authenticated/map'
     | '/_authenticated/notifications'
     | '/_authenticated/report'
+    | '/_authenticated/rewards'
     | '/_authenticated/admin/escalations'
     | '/_authenticated/admin/queue'
     | '/_authenticated/complaint/$id'
@@ -279,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/rewards': {
+      id: '/_authenticated/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof AuthenticatedRewardsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/escalations': {
       id: '/_authenticated/admin/escalations'
       path: '/escalations'
@@ -324,6 +343,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMapRoute: typeof AuthenticatedMapRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedReportRoute: typeof AuthenticatedReportRoute
+  AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedComplaintIdRoute: typeof AuthenticatedComplaintIdRoute
 }
 
@@ -335,6 +355,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMapRoute: AuthenticatedMapRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedReportRoute: AuthenticatedReportRoute,
+  AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedComplaintIdRoute: AuthenticatedComplaintIdRoute,
 }
 

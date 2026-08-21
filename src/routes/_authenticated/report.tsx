@@ -405,6 +405,23 @@ function ReportPage() {
         },
       });
 
+      // The database independently checks integrity signals and the monthly cap.
+      const rewardsDb = supabase as unknown as {
+        rpc: (
+          name: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ data: unknown; error: { message: string } | null }>;
+      };
+      const { data: rewardResult } = await rewardsDb.rpc("award_civic_points", {
+        _action: "VALID_COMPLAINT",
+        _complaint_id: complaint.id,
+      });
+      const reward = Array.isArray(rewardResult)
+        ? rewardResult[0]
+        : (rewardResult as { awarded?: number } | null);
+      if (reward?.awarded)
+        toast.success(`+${reward.awarded} CivicPoints for your verified report.`);
+
       await supabase.from("notifications").insert({
         user_id: user.id,
         complaint_id: complaint.id,

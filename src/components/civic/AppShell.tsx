@@ -12,6 +12,7 @@ const citizenLinks = [
   { to: "/dashboard", label: "My Reports" },
   { to: "/report", label: "Report Issue" },
   { to: "/community", label: "Community" },
+  { to: "/rewards", label: "Civic Rewards" },
   { to: "/map", label: "Live Map" },
   { to: "/help", label: "Help & Support" },
 ];

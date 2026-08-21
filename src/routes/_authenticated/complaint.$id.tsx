@@ -193,6 +193,23 @@ function ComplaintPage() {
         .from("community_support")
         .insert({ complaint_id: id, user_id: user.id });
       if (error) toast.error(error.message);
+      else {
+        const rewardsDb = supabase as unknown as {
+          rpc: (
+            name: string,
+            args: Record<string, unknown>,
+          ) => Promise<{ data: unknown; error: { message: string } | null }>;
+        };
+        const { data: rewardResult } = await rewardsDb.rpc("award_civic_points", {
+          _action: "GENUINE_SUPPORT",
+          _complaint_id: id,
+        });
+        const reward = Array.isArray(rewardResult)
+          ? rewardResult[0]
+          : (rewardResult as { awarded?: number } | null);
+        if (reward?.awarded)
+          toast.success(`+${reward.awarded} CivicPoints for supporting this report.`);
+      }
     }
     void queryClient.invalidateQueries({ queryKey: ["complaint", id] });
   }
@@ -233,6 +250,23 @@ function ComplaintPage() {
         .eq("id", id);
       if (statusError) toast.error(statusError.message);
       else toast.success(isVerified ? "Thanks for confirming the fix." : "Report reopened.");
+      if (isVerified && !statusError) {
+        const rewardsDb = supabase as unknown as {
+          rpc: (
+            name: string,
+            args: Record<string, unknown>,
+          ) => Promise<{ data: unknown; error: { message: string } | null }>;
+        };
+        const { data: rewardResult } = await rewardsDb.rpc("award_civic_points", {
+          _action: "RESOLUTION_VERIFICATION",
+          _complaint_id: id,
+        });
+        const reward = Array.isArray(rewardResult)
+          ? rewardResult[0]
+          : (rewardResult as { awarded?: number } | null);
+        if (reward?.awarded)
+          toast.success(`+${reward.awarded} CivicPoints for completing verification.`);
+      }
       void queryClient.invalidateQueries({ queryKey: ["complaint", id] });
       setReopenMode(false);
       setReopenReason("");
